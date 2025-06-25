@@ -139,7 +139,6 @@ class MockTestController extends Controller
     {
         $currentTest = TestType::where('slug', $slug)->firstOrFail();
 
-        // Lấy phần thi trước đó (dựa theo id nhỏ hơn gần nhất)
         $previousTest = TestType::where('id', '<', $currentTest->id)
             ->orderBy('id', 'desc')
             ->first();
@@ -157,13 +156,13 @@ class MockTestController extends Controller
         $results = [];
 
         foreach ($testTypes as $testType) {
-            $questions = $testType->questions;
+            $questions = $testType->questions()->with('answers')->get();
             $questionIds = $questions->pluck('id');
 
+            $userAnswers = UserAnswerQuestion::whereIn('question_id', $questionIds)->get()->keyBy('question_id');
+
             $totalQuestions = $questions->count();
-            $correctAnswers = UserAnswerQuestion::whereIn('question_id', $questionIds)
-                ->where('is_correct', true)
-                ->count();
+            $correctAnswers = $userAnswers->where('is_correct', true)->count();
 
             // Rule để đạt từng phần thi
             $isPassed = match ($testType->slug) {
@@ -171,6 +170,23 @@ class MockTestController extends Controller
                 'reading', 'writing-test' => $correctAnswers >= 1,
                 default => null,
             };
+
+            // Chi tiết từng câu hỏi
+            $details = [];
+
+            foreach ($questions as $question) {
+                $userAnswer = $userAnswers->get($question->id);
+
+                $correctAnswer = $question->answers->firstWhere('is_correct', true);
+
+                $details[] = [
+                    'question' => $question->question_text,
+                    'type' => $question->type,
+                    'user_answer' => $userAnswer?->answer_text ?? $userAnswer?->answer?->answer_text,
+                    'correct_answer' => $correctAnswer?->answer_text,
+                    'is_correct' => $userAnswer?->is_correct,
+                ];
+            }
 
             $results[] = [
                 'title' => $testType->title,
@@ -181,6 +197,7 @@ class MockTestController extends Controller
                 'total' => $totalQuestions,
                 'is_passed' => $isPassed,
                 'is_complete' => $totalQuestions > 0,
+                'details' => $details,
             ];
         }
 

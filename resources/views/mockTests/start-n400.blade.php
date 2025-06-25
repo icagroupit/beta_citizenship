@@ -25,6 +25,8 @@
                     <div class="quiz-container">
                         <div class="audio">
                             <img src="{{ asset('icons/mockTests/audio.svg') }}" style="width: 40px;" alt="Play audio" />
+                            <input class="questionText hidden" type="hidden"
+                                value="{{ $question->question_text }}"></input>
                         </div>
 
                         <textarea type="text" name="answer_text" class="instruction-text form-control mt-3" placeholder="Nhập ở đây">
@@ -43,6 +45,8 @@
                     <div class="quiz-container">
                         <div class="audio">
                             <img src="{{ asset('icons/mockTests/audio.svg') }}" style="width: 40px;" alt="Play audio" />
+                            <input class="questionText hidden" type="hidden"
+                                value="{{ $question->question_text }}"></input>
                         </div>
 
                         <div class="radio-options bg-light p-4 rounded">
@@ -73,6 +77,7 @@
 @push('scripts')
     <script>
         $(document).ready(function() {
+
             const isTextType = $('textarea[name="answer_text"]').length > 0;
 
             if (isTextType) {
@@ -94,7 +99,7 @@
                 $('input[name="answer_id"]').on('change', function() {
                     $('.radio-label').removeClass('active'); // Bỏ active các label khác
                     $(`label[for="${$(this).attr('id')}"]`).addClass(
-                    'active'); // Thêm active label tương ứng
+                        'active'); // Thêm active label tương ứng
 
                     $('#nextBtn').addClass('active'); // Cho phép bấm nút tiếp
                 });
@@ -109,6 +114,12 @@
                     $('#questionForm').submit();
                 });
             }
+
+            $('.audio').on('click', function() {
+                const text = $('.questionText').val();
+                console.log('speak', text)
+                speak(text);
+            })
         });
     </script>
 @endpush
