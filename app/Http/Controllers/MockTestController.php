@@ -111,21 +111,52 @@ class MockTestController extends Controller
             $isCorrect = Answer::where('id', $answerId)->where('is_correct', true)->exists();
         }
 
-        UserAnswerQuestion::create([
-            'attempt_id' => $attemptId,
-            'user_id' => null,
-            'question_id' => $questionId,
-            'answer_id' => $answerId,
-            'answer_text' => $answerText,
-            'is_correct' => $isCorrect,
-            'answered_at' => now(),
-        ]);
-
         $testType = TestType::where('slug', $slug)->firstOrFail();
-
         $currentPage = (int) $request->query('page', 1);
         $total = $testType->questions()->count();
+        $maxAttempts = $testType->max_attempts ?? 1;
 
+        // Check nếu đã có câu trả lời trước đó thì update
+        $userAnswer = UserAnswerQuestion::where('attempt_id', $attemptId)
+            ->where('question_id', $questionId)
+            ->first();
+
+        if ($userAnswer) {
+            $userAnswer->update([
+                'answer_id' => $answerId,
+                'answer_text' => $answerText,
+                'is_correct' => $isCorrect,
+                'answered_at' => now(),
+            ]);
+        } else {
+            UserAnswerQuestion::create([
+                'attempt_id' => $attemptId,
+                'user_id' => null,
+                'question_id' => $questionId,
+                'answer_id' => $answerId,
+                'answer_text' => $answerText,
+                'is_correct' => $isCorrect,
+                'answered_at' => now(),
+            ]);
+        }
+
+        // Nếu là writing và sai thì xử lý retry
+        if ($slug === 'writing' && !$isCorrect) {
+            $attemptCount = session()->get("writing_retry_{$questionId}", 1);
+
+            if ($attemptCount >= $maxAttempts) {
+                session()->forget("writing_retry_{$questionId}");
+                return redirect()->route('mock-test.prepare', ['n400']);
+            }
+
+            session()->put("writing_retry_{$questionId}", $attemptCount + 1);
+            $remaining = $maxAttempts - $attemptCount;
+
+            return redirect()->route('start.mock-test', [$slug, 'page' => $currentPage])
+                ->with('error', "Câu trả lời chưa đúng. Bạn còn {$remaining} lượt thử lại.");
+        }
+
+        // Chuyển trang tiếp theo nếu không phải writing hoặc đúng
         if ($currentPage >= $total) {
             $nextTest = TestType::where('id', '>', $testType->id)->orderBy('id')->first();
 
@@ -136,7 +167,6 @@ class MockTestController extends Controller
 
         return redirect()->route('start.mock-test', [$slug, 'page' => $currentPage + 1]);
     }
-
 
     public function prepare($slug)
     {

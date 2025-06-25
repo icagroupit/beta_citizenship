@@ -3,6 +3,13 @@
 @section('title', $testType->title)
 
 @section('content')
+
+    @if (session('error'))
+        <div class="alert alert-danger mt-3">
+            {{ session('error') }}
+        </div>
+    @endif
+
     <div class="container">
         <div class="header">
             <a href="#"><img src="{{ asset('icons/mockTests/home.svg') }}" alt="Home" /></a>
@@ -36,6 +43,10 @@
             @endif
 
             <div class="test-footer">
+                <a href="{{ $page > 1 ? route('start.mock-test', $testType->slug) . '?page=' . ($page - 1) : '#' }}"
+                    class="btn btn-round {{ $page <= 1 ? 'disabled' : '' }}" id="prevBtn">
+                    <img src="{{ asset('icons/mockTests/arrow-left.svg') }}" alt="Prev" />
+                </a>
                 <a href="#" class="btn-round" id="nextBtn">
                     <img src="{{ asset('icons/mockTests/arrow-right.svg') }}" alt="Next" />
                 </a>

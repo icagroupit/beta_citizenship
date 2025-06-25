@@ -65,6 +65,9 @@
             @endif
 
             <div class="test-footer">
+                <button class="btn btn-round" id="prevBtn">
+                    <img src="{{ asset('icons/mockTests/arrow-left.svg') }}" alt="Prev" />
+                </button>
                 <button class="btn btn-round" id="nextBtn">
                     <img src="{{ asset('icons/mockTests/arrow-right.svg') }}" alt="Next" />
                 </button>
