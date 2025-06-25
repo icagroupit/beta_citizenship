@@ -25,6 +25,8 @@
                     <div class="quiz-container">
                         <div class="audio">
                             <img src="{{ asset('icons/mockTests/audio.svg') }}" style="width: 40px;" alt="Play audio" />
+                            <input class="questionText hidden" type="hidden"
+                                value="{{ $question->question_text }}"></input>
                         </div>
 
                         <textarea type="text" name="answer_text" class="instruction-text form-control mt-3" placeholder="Nhập ở đây">
@@ -55,6 +57,11 @@
                         $('#nextBtn').removeClass('active');
                     }
                 });
+
+                $('.audio').on('click', function() {
+                    const text = $('.questionText').val();
+                    speak(text);
+                })
 
                 $('#nextBtn').on('click', function(e) {
                     if (!$('textarea[name="answer_text"]').val().trim()) {

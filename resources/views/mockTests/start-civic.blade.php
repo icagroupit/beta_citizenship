@@ -23,6 +23,7 @@
             @if ($question)
                 <div class="audio shadow">
                     <img src="{{ asset('icons/mockTests/audio.svg') }}" style="width: 40px;" alt="Play audio" />
+                    <input class="questionText hidden" type="hidden" value="{{ $question->question_text }}"></input>
                 </div>
 
                 <form method="POST" action="{{ route('submit.answer', [$testType->slug, 'page' => $page]) }}"
@@ -62,6 +63,12 @@
                     $('#nextBtn').addClass('active');
 
                 });
+
+                $('.audio').on('click', function() {
+                    const text = $('.questionText').val();
+                    console.log('speak', text);
+                    speak(text);
+                })
 
                 $('#nextBtn').on('click', function(e) {
                     e.preventDefault();
