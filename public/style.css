@@ -1,3 +1,10 @@
+@font-face {
+    font-family: "SVN-Linux Libertine";
+    src: url("/fonts/Libertine.ttf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -5,9 +12,8 @@
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-        sans-serif;
-    background-color: #f8f9fa;
+    font-family: "SVN-Linux Libertine", serif;
+    background-color: #f5f4fa;
     color: #333;
     line-height: 1.5;
 }
@@ -15,24 +21,40 @@ body {
 .container {
     max-width: 100%;
     min-height: 100vh;
-    background-color: #f8f9fa;
+    background-color: #f5f4fa;
     padding: 5px;
 }
 
 /* Header */
 .header {
-    background-color: white;
-    padding: 16px 20px;
-    border-bottom: 1px solid #e9ecef;
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 20px;
+}
+
+.header-inner {
+    background-color: #f5f4fa;
+    padding: 10px 20px;
+    border-bottom: 1px solid #c8e2f9;
 }
 
 .header-title {
-    font-size: 16px;
-    font-weight: 600;
+    font-size: 24px;
+    font-weight: 700;
     color: #1f2937;
+    margin-bottom: 0;
+}
+
+.header-subtitle {
+    font-size: 20px;
+    font-weight: 700;
+    color: #828282;
+}
+
+.header-subtitle-2 {
+    font-size: 20px;
+    font-weight: 400;
+    color: #828282;
 }
 
 /* Main Content */
@@ -41,10 +63,12 @@ body {
 }
 
 .section-title {
+    font-family: "Inter", sans-serif;
     font-size: 18px;
     font-weight: 700;
     color: #4f4f4f;
-    margin-bottom: 20px;
+    margin-bottom: 12px;
+    margin-top: 22px;
 }
 
 .flex {
@@ -54,6 +78,26 @@ body {
 
 .gap-sm {
     gap: 6px;
+}
+
+/* Question Header */
+
+.question-header {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.question-title {
+    font-family: "Inter", serif;
+    font-weight: 400;
+    font-size: 15px;
+    margin-bottom: 0;
+}
+
+.question-number {
+    font-family: "Inter", serif;
+    font-weight: 700;
+    font-size: 15px;
 }
 
 /* Test Cards */
@@ -102,21 +146,23 @@ body {
 }
 
 .test-title {
-    font-size: 16px;
+    font-size: 20px;
     font-weight: 700;
     color: #000;
     margin-bottom: 4px;
 }
 
 .test-subtitle {
-    font-size: 16px;
+    font-size: 20px;
+    font-weight: 400;
     color: #000;
     margin-bottom: 6px;
 }
 
 .test-progress {
-    font-size: 14px;
-    color: #374151;
+    font-size: 20px;
+    font-weight: 400;
+    color: #000;
     margin-bottom: 0;
 }
 
@@ -130,11 +176,14 @@ body {
 }
 
 .btn-normal {
+    font-family: "Inter", serif;
     background: #1247bb;
     color: #fff;
     padding: 10px 25px;
     font-size: 16px;
     font-weight: 700;
+    outline: none;
+    border: none;
 }
 
 .btn-normal.big {
@@ -149,11 +198,12 @@ body {
     height: 60px;
     border-radius: 50%;
     background: #d0d0d0;
+
     /* margin: 0 auto; */
 }
 
 .btn-round.active {
-    background: #11357c;
+    background: #1247bb;
 }
 
 .btn-round.active img {
@@ -163,10 +213,15 @@ body {
 
 .test-footer {
     background: #f5f4fae5;
+    opacity: 0.9;
     display: flex;
     justify-content: center;
     gap: 16px;
     margin-top: 20px;
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
 }
 
 /* Warning Section */
@@ -175,7 +230,6 @@ body {
     border-radius: 4px;
     padding: 10px;
     margin: 14px 0;
-    margin-bottom: 70px;
     border-left: 4px solid #dc2626;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
@@ -199,9 +253,12 @@ body {
 }
 
 .warning-text {
-    font-size: 14px;
-    color: #374151;
+    font-family: "Inter", sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+    color: #000;
     line-height: 1.5;
+    margin-bottom: 0;
 }
 
 /* Start Button */
@@ -239,12 +296,41 @@ body {
     display: flex;
     justify-content: center;
     margin: 0 auto;
-    margin-bottom: 20px;
     cursor: pointer;
+    margin-top: 16px;
+    margin-bottom: 16px;
 }
 
 .audio.shadow {
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+/* Fonts */
+.font-sm {
+    font-weight: 400;
+    font-size: 20px;
+    margin: 0;
+}
+
+.font-sm-2 {
+    font-family: "Inter", sans-serif;
+    font-weight: 400;
+    font-size: 16px;
+    margin: 0;
+}
+
+.font-md {
+    font-weight: 700;
+    font-size: 20px;
+    margin: 0;
+}
+
+.font-md-2 {
+    font-family: "Inter", sans-serif;
+    font-weight: 700;
+    font-size: 20px;
+    margin: 0;
+    margin-top: 28px;
 }
 
 /* Options */
@@ -293,7 +379,8 @@ body {
     align-items: center;
     background: #fff;
     min-height: 584px;
-    margin-top: 20px;
+    margin: 20px 0;
+    padding: 20px 40px;
 }
 
 .prepare-icon {
@@ -312,6 +399,7 @@ body {
     padding: 30px 20px;
     text-align: center;
     margin: 0;
+    margin-top: 60px;
 }
 
 .question-text {
@@ -334,6 +422,10 @@ body {
     border: none;
 }
 
+input::placeholder {
+    text-align: center;
+}
+
 /* Result */
 .result-title {
     font-size: 24px;
@@ -350,6 +442,7 @@ body {
 }
 
 .result-badge {
+    font-family: "Inter", sans-serif;
     padding: 10px 0px;
     min-width: 70px;
 }
@@ -362,6 +455,10 @@ body {
 
 .hidden {
     display: none !important;
+}
+
+.custom-accordion {
+    margin-top: 60px;
 }
 
 /* Responsive design */

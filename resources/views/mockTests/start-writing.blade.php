@@ -11,16 +11,20 @@
     @endif
 
     <div class="container">
-        <div class="header">
-            <a href="#"><img src="{{ asset('icons/mockTests/home.svg') }}" alt="Home" /></a>
-            <h1 class="header-title">
-                THI THỬ<br>
-                {{ $testType->title }}
-                @if ($testType->vietnamese_title)
-                    ({{ $testType->vietnamese_title }})
-                @endif
-            </h1>
+        <div class="header-inner">
+            <div class="header">
+                <a href="#"><img src="{{ asset('icons/mockTests/home.svg') }}" alt="Home" /></a>
+                <h1 class="header-title">
+                    THI THỬ<br>
+                    <span class="header-subtitle">{{ $testType->title }}</span>
+
+                    @if ($testType->vietnamese_title)
+                        <span class="header-subtitle-2">({{ $testType->vietnamese_title }})</span>
+                    @endif
+                </h1>
+            </div>
         </div>
+
 
         <main class="main-content">
             @if ($question)

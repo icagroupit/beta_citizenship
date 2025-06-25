@@ -241,7 +241,7 @@ class MockTestController extends Controller
             ];
         }
 
-        $request->session()->forget('mock_test_attempt_id');
+        // $request->session()->forget('mock_test_attempt_id');
         return view('mockTests.result', compact('results'));
     }
 }
