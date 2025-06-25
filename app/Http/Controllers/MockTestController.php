@@ -7,6 +7,7 @@ use App\Models\Question;
 use App\Models\TestType;
 use App\Models\UserAnswerQuestion;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class MockTestController extends Controller
 {
@@ -53,28 +54,31 @@ class MockTestController extends Controller
     {
         $testType = TestType::where('slug', $slug)->firstOrFail();
 
+        if (!$request->session()->has('mock_test_attempt_id')) {
+            $attemptId = (string) Str::uuid();
+            $request->session()->put('mock_test_attempt_id', $attemptId);
+        } else {
+            $attemptId = $request->session()->get('mock_test_attempt_id');
+        }
+
         $page = (int) $request->query('page', 1);
         $question = $testType->questions()->with('answers')->skip($page - 1)->take(1)->first();
 
-        if ($slug === 'civics') {
-            $total = 10;
-            return view('mockTests.start-civic', compact('testType', 'question', 'page', 'total'));
-        }
+        $total = match ($slug) {
+            'civics' => 10,
+            'reading', 'writing' => 1,
+            'n400' => 5,
+            default => $testType->questions()->count(),
+        };
 
-        if ($slug === 'reading') {
-            $total = 1;
-            return view('mockTests.start-reading', compact('testType', 'question', 'page', 'total'));
-        }
+        $view = match ($slug) {
+            'civics' => 'mockTests.start-civic',
+            'reading' => 'mockTests.start-reading',
+            'writing' => 'mockTests.start-writing',
+            'n400' => 'mockTests.start-n400',
+        };
 
-        if ($slug === 'writing') {
-            $total = 1;
-            return view('mockTests.start-writing', compact('testType', 'question', 'page', 'total'));
-        }
-
-        if ($slug === 'n400') {
-            $total = 5;
-            return view('mockTests.start-n400', compact('testType', 'question', 'page', 'total'));
-        }
+        return view($view, compact('testType', 'question', 'page', 'total', 'attemptId'));
     }
 
     public function submitAnswer(Request $request, $slug)
@@ -88,36 +92,34 @@ class MockTestController extends Controller
         $questionId = $request->question_id;
         $answerId = $request->answer_id;
         $answerText = $request->answer_text;
+        $attemptId = session()->get('mock_test_attempt_id');
+
+        if (!$attemptId) {
+            return redirect()->route('start.mock-test', $slug)->with('error', 'Bài thi chưa được khởi tạo.');
+        }
 
         $question = Question::with('answers')->findOrFail($questionId);
-
         $isCorrect = false;
 
         if ($question->type === 'text' && $answerText) {
             $correctAnswer = $question->answers->firstWhere('is_correct', true);
-            if ($correctAnswer) {
-                $isCorrect = strtolower(trim($correctAnswer->answer_text)) === strtolower(trim($answerText));
-            }
+            $isCorrect = $correctAnswer &&
+                strtolower(trim($correctAnswer->answer_text)) === strtolower(trim($answerText));
         }
 
         if ($question->type === 'multiple_choice' && $answerId) {
-            $isCorrect = Answer::where('id', $answerId)
-                ->where('is_correct', true)
-                ->exists();
+            $isCorrect = Answer::where('id', $answerId)->where('is_correct', true)->exists();
         }
 
-        UserAnswerQuestion::updateOrCreate(
-            [
-                'user_id' => null,
-                'question_id' => $questionId,
-            ],
-            [
-                'answer_id' => $answerId,
-                'answer_text' => $answerText,
-                'is_correct' => $isCorrect,
-                'answered_at' => now(),
-            ]
-        );
+        UserAnswerQuestion::create([
+            'attempt_id' => $attemptId,
+            'user_id' => null,
+            'question_id' => $questionId,
+            'answer_id' => $answerId,
+            'answer_text' => $answerText,
+            'is_correct' => $isCorrect,
+            'answered_at' => now(),
+        ]);
 
         $testType = TestType::where('slug', $slug)->firstOrFail();
 
@@ -126,6 +128,7 @@ class MockTestController extends Controller
 
         if ($currentPage >= $total) {
             $nextTest = TestType::where('id', '>', $testType->id)->orderBy('id')->first();
+
             return $nextTest
                 ? redirect()->route('mock-test.prepare', $nextTest->slug)
                 : redirect()->route('mock-test.result');
@@ -149,34 +152,41 @@ class MockTestController extends Controller
         ]);
     }
 
-    public function showResult()
+    public function showResult(Request $request)
     {
         $testTypes = TestType::orderBy('id')->get();
-
         $results = [];
 
         foreach ($testTypes as $testType) {
             $questions = $testType->questions()->with('answers')->get();
             $questionIds = $questions->pluck('id');
 
-            $userAnswers = UserAnswerQuestion::whereIn('question_id', $questionIds)->get()->keyBy('question_id');
+            $attemptId = $request->session()->get("mock_test_attempt_id");
+
+            if (!$attemptId) {
+                // Nếu không có attempt, bỏ qua test này
+                continue;
+            }
+
+            $userAnswers = UserAnswerQuestion::where('attempt_id', $attemptId)
+                ->whereIn('question_id', $questionIds)
+                ->with('answer') // để lấy dữ liệu answer_text nếu chọn lựa
+                ->get()
+                ->keyBy('question_id');
 
             $totalQuestions = $questions->count();
             $correctAnswers = $userAnswers->where('is_correct', true)->count();
 
-            // Rule để đạt từng phần thi
             $isPassed = match ($testType->slug) {
                 'civics' => $correctAnswers >= 6,
-                'reading', 'writing-test' => $correctAnswers >= 1,
+                'reading', 'writing' => $correctAnswers >= 1,
                 default => null,
             };
 
-            // Chi tiết từng câu hỏi
             $details = [];
 
             foreach ($questions as $question) {
                 $userAnswer = $userAnswers->get($question->id);
-
                 $correctAnswer = $question->answers->firstWhere('is_correct', true);
 
                 $details[] = [
@@ -201,6 +211,7 @@ class MockTestController extends Controller
             ];
         }
 
+        $request->session()->forget('mock_test_attempt_id');
         return view('mockTests.result', compact('results'));
     }
 }
