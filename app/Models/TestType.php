@@ -1,0 +1,18 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class TestType extends Model
+{
+    use HasFactory;
+
+    protected $fillable = ['title', 'vietnamese_title', 'slug', 'note', 'icon'];
+
+    public function questions()
+    {
+        return $this->hasMany(Question::class);
+    }
+}
