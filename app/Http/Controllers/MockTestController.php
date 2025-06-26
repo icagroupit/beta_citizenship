@@ -15,39 +15,6 @@ class MockTestController extends Controller
 {
     public function show()
     {
-        // $mockTest = [
-        //     [
-        //         'title' => 'Civics Test',
-        //         'vietnamese_title' => 'Bài thi dân sự',
-        //         'correct' => 6,
-        //         'total' => 10,
-        //         'note' => 'Đúng ít nhất 6/10 câu',
-        //         'slug' => 'civics',
-        //     ],
-        //     [
-        //         'title' => 'Reading Test',
-        //         'vietnamese_title' => 'Bài thi đọc',
-        //         'correct' => 1,
-        //         'total' => 3,
-        //         'note' => 'Đọc đúng 1 câu (có 3 cơ hội làm bài)',
-        //         'slug' => 'reading',
-        //     ],
-        //     [
-        //         'title' => 'Writing Test',
-        //         'vietnamese_title' => 'Bài thi viết',
-        //         'correct' => 1,
-        //         'total' => 3,
-        //         'note' => 'Viết đúng 1 câu (có 3 cơ hội làm bài)',
-        //         'slug' => 'writing',
-        //     ],
-        //     [
-        //         'title' => 'N-400',
-        //         'vietnamese_title' => '',
-        //         'note' => 'Câu trả lời dựa trên các thông tin bạn đã điền trên Form N-400',
-        //         'slug' => 'n400',
-        //     ],
-        // ];
-
         $mockTest = TestType::all();
         return view('mockTests.index', compact('mockTest'));
     }
@@ -146,7 +113,7 @@ class MockTestController extends Controller
         }
 
         // Nếu là writing và sai thì xử lý retry
-        if ($slug === 'writing' && !$isCorrect) {
+        if (($slug === 'writing') && !$isCorrect) {
             $attemptCount = session()->get("writing_retry_{$questionId}", 1);
 
             if ($attemptCount >= $maxAttempts) {
@@ -222,6 +189,7 @@ class MockTestController extends Controller
 
             foreach ($questions as $question) {
                 $userAnswer = $userAnswers->get($question->id);
+
                 $correctAnswer = $question->answers->firstWhere('is_correct', true);
 
                 $details[] = [
@@ -248,6 +216,7 @@ class MockTestController extends Controller
                 'details' => $details,
             ];
         }
+
 
         // $request->session()->forget('mock_test_attempt_id');
         return view('mockTests.result', compact('results'));

@@ -3,6 +3,13 @@
 @section('title', $testType->title)
 
 @section('content')
+
+    @if (session('error'))
+        <div class="alert alert-danger mt-3">
+            {{ session('error') }}
+        </div>
+    @endif
+
     <div class="container">
         <div class="container">
             <div class="header-inner">
@@ -29,13 +36,15 @@
                         <div class="quiz-container">
                             <div class="audio">
                                 <img src="{{ asset('icons/mockTests/audio.svg') }}" style="width: 40px;" alt="Play audio" />
+                                <input class="questionText hidden" type="hidden"
+                                    value="{{ $question->question_text }}"></input>
                             </div>
 
                             <h1 class="font-sm">
                                 {{ $question->question_text }}
                             </h1>
 
-                            <input type="text" name="answer_text" class="instruction-text form-control mt-3"
+                            <input type="text" name="answer_text" disabled class="instruction-text form-control mt-3"
                                 placeholder="Nhấn vào micro và đọc câu">
                         </div>
                     </form>
@@ -46,7 +55,7 @@
                         class="btn btn-round {{ $page <= 1 ? 'disabled' : '' }}" id="prevBtn">
                         <img src="{{ asset('icons/mockTests/arrow-left.svg') }}" alt="Prev" />
                     </a>
-                    <button class="btn btn-round active">
+                    <button class="btn btn-round active microBtn">
                         <img src="{{ asset('icons/mockTests/micro.svg') }}" alt="">
                     </button>
                     <a href="{{ route('start.mock-test', $testType->slug) }}?page={{ $page + 1 }}" class="btn-round"
@@ -70,6 +79,19 @@
                         $('#nextBtn').addClass('active');
 
                     });
+
+                    $('.microBtn').on('click', function() {
+                        listen(function(text) {
+
+                            console.log('hear', text)
+                            $('input[name="answer_text"]').val(text).trigger('input');
+                        });
+                    });
+
+                    $('.audio').on('click', function() {
+                        const text = $('.questionText').val();
+                        speak(text);
+                    })
 
                     $('#nextBtn').on('click', function(e) {
                         e.preventDefault();

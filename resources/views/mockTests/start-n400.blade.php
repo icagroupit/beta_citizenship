@@ -99,6 +99,15 @@
 @push('scripts')
     <script>
         $(document).ready(function() {
+
+            // Audio click (text-to-speech)
+            $('.audio').on('click', function() {
+                const text = $('.questionText').val();
+                console.log('speak', text);
+                speak(text);
+            });
+
+
             const isTextType = $('textarea[name="answer_text"]').length > 0;
 
             // Trường hợp dạng TEXT
@@ -171,12 +180,7 @@
                 $('#questionForm').submit();
             });
 
-            // Audio click (text-to-speech)
-            $('.audio').on('click', function() {
-                const text = $('.questionText').val();
-                console.log('speak', text);
-                speak(text);
-            });
+
         });
     </script>
 @endpush
