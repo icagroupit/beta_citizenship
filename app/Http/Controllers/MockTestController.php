@@ -9,6 +9,8 @@ use App\Models\UserAnswerQuestion;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
+use function PHPUnit\Framework\isEmpty;
+
 class MockTestController extends Controller
 {
     public function show()
@@ -92,6 +94,7 @@ class MockTestController extends Controller
         $questionId = $request->question_id;
         $answerId = $request->answer_id;
         $answerText = $request->answer_text;
+        $additionalField = $request->additional_field;
         $attemptId = session()->get('mock_test_attempt_id');
 
         if (!$attemptId) {
@@ -125,6 +128,7 @@ class MockTestController extends Controller
             $userAnswer->update([
                 'answer_id' => $answerId,
                 'answer_text' => $answerText,
+                'additional_answer' => empty($additionalField) ? null : $additionalField,
                 'is_correct' => $isCorrect,
                 'answered_at' => now(),
             ]);
@@ -135,6 +139,7 @@ class MockTestController extends Controller
                 'question_id' => $questionId,
                 'answer_id' => $answerId,
                 'answer_text' => $answerText,
+                'additional_answer' => empty($additionalField) ? null : $additionalField,
                 'is_correct' => $isCorrect,
                 'answered_at' => now(),
             ]);

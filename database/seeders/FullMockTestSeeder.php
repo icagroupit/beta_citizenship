@@ -93,7 +93,7 @@ class FullMockTestSeeder extends Seeder
         ]);
         Answer::create([
             'question_id' => $q5->id,
-            'answer_text' => 'John Doe',
+            'answer_text' => '',
             'is_correct' => true,
         ]);
 
