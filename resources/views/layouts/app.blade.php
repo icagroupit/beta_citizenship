@@ -28,11 +28,33 @@
         integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q" crossorigin="anonymous">
     </script>
     <script>
+        let isSpeaking = false;
+
         function speak(text) {
             const synth = window.speechSynthesis;
-            const utter = new SpeechSynthesisUtterance(text);
 
+            // Nếu đang đọc thì bỏ qua
+            if (isSpeaking || synth.speaking) {
+                console.warn("Speech is already in progress...");
+                return;
+            }
+
+            const utter = new SpeechSynthesisUtterance(text);
             utter.voice = synth.getVoices().find(voice => voice.lang === 'en-US');
+
+            isSpeaking = true;
+
+            // Khi đọc xong
+            utter.onend = () => {
+                isSpeaking = false;
+                console.log("Speech finished.");
+            };
+
+            // Nếu có lỗi
+            utter.onerror = () => {
+                isSpeaking = false;
+                console.error("Speech failed.");
+            };
 
             synth.speak(utter);
         }
