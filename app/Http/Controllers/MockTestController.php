@@ -30,6 +30,20 @@ class MockTestController extends Controller
             $attemptId = $request->session()->get('mock_test_attempt_id');
         }
 
+        //  Đếm số câu đúng
+        if ($slug === 'civics') {
+            $correctAnswersCount = UserAnswerQuestion::where('attempt_id', $attemptId)
+                ->where('is_correct', true)
+                ->whereHas('question.testType', function ($q) use ($slug) {
+                    $q->where('slug', $slug);
+                })
+                ->count();
+
+            if ($correctAnswersCount >= 6) {
+                return redirect()->route('mock-test.prepare', 'reading');
+            }
+        }
+
         $page = (int) $request->query('page', 1);
         $question = $testType->questions()->with('answers')->skip($page - 1)->take(1)->first();
 
@@ -190,6 +204,11 @@ class MockTestController extends Controller
             foreach ($questions as $question) {
                 $userAnswer = $userAnswers->get($question->id);
 
+                //  Nếu là civics và chưa trả lời => bỏ qua
+                if ($testType->slug === 'civics' && !$userAnswer) {
+                    continue;
+                }
+
                 $correctAnswer = $question->answers->firstWhere('is_correct', true);
 
                 $details[] = [
@@ -218,7 +237,7 @@ class MockTestController extends Controller
         }
 
 
-        // $request->session()->forget('mock_test_attempt_id');
+        $request->session()->forget('mock_test_attempt_id');
         return view('mockTests.result', compact('results'));
     }
 }

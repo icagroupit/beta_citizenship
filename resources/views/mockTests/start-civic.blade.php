@@ -52,10 +52,10 @@
                 </form>
 
                 <div class="test-footer">
-                    <a href="{{ $page > 1 ? route('start.mock-test', $testType->slug) . '?page=' . ($page - 1) : '#' }}"
+                    {{-- <a href="{{ $page > 1 ? route('start.mock-test', $testType->slug) . '?page=' . ($page - 1) : '#' }}"
                         class="btn btn-round {{ $page <= 1 ? 'disabled' : '' }}" id="prevBtn">
                         <img src="{{ asset('icons/mockTests/arrow-left.svg') }}" alt="Prev" />
-                    </a>
+                    </a> --}}
 
                     <a href="{{ route('start.mock-test', $testType->slug) }}?page={{ $page + 1 }}" class="btn-round"
                         id="nextBtn">
