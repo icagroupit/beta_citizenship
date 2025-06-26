@@ -56,7 +56,7 @@
                         <img src="{{ asset('icons/mockTests/arrow-left.svg') }}" alt="Prev" />
                     </a> --}}
                     <button class="btn btn-round active microBtn">
-                        <img src="{{ asset('icons/mockTests/micro.svg') }}" alt="">
+                        <img class="micro-icon" src="{{ asset('icons/mockTests/micro.svg') }}" alt="">
                     </button>
                     <a href="{{ route('start.mock-test', $testType->slug) }}?page={{ $page + 1 }}" class="btn-round"
                         id="nextBtn">
@@ -81,11 +81,25 @@
                     });
 
                     $('.microBtn').on('click', function() {
-                        listen(function(text) {
+                        if (isListening) return;
 
-                            console.log('hear', text)
-                            $('input[name="answer_text"]').val(text).trigger('input');
-                        });
+                        const $icon = $('.micro-icon');
+                        const originalSrc = $icon.attr('src');
+                        const recordingSrc = '{{ asset('icons/mockTests/micro-recording.svg') }}';
+
+                        $icon.attr('src', recordingSrc);
+
+                        listen(
+                            function(text) {
+                                $('input[name="answer_text"]').val(text).trigger('input');
+                            },
+                            function() {
+                                $icon.attr('src', originalSrc); // khi xong
+                            },
+                            function() {
+                                $icon.attr('src', originalSrc); // khi lỗi
+                            }
+                        );
                     });
 
                     $('.audio').on('click', function() {

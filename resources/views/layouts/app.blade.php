@@ -68,8 +68,7 @@
         // Speech to text
         let isListening = false;
 
-        function listen(onResult = (text) => {}) {
-            // Kiểm tra trình duyệt hỗ trợ
+        function listen(onResult = (text) => {}, onDone = () => {}, onError = () => {}) {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (!SpeechRecognition) {
                 alert("Trình duyệt của bạn không hỗ trợ Speech Recognition.");
@@ -82,7 +81,7 @@
             }
 
             const recognition = new SpeechRecognition();
-            recognition.lang = 'en-US'; // hoặc 'vi-VN' nếu muốn tiếng Việt
+            recognition.lang = 'en-US';
             recognition.interimResults = false;
             recognition.maxAlternatives = 1;
 
@@ -94,13 +93,11 @@
 
             recognition.onresult = (event) => {
                 const transcript = event.results[0][0].transcript;
-                console.log("Recognized:", transcript);
                 onResult(transcript);
             };
 
             recognition.onerror = (event) => {
                 console.error("Speech recognition error:", event.error);
-
                 let message = "Đã xảy ra lỗi khi nhận giọng nói.";
 
                 switch (event.error) {
@@ -111,20 +108,16 @@
                         message = "Không thể truy cập microphone. Vui lòng kiểm tra thiết bị.";
                         break;
                     case 'not-allowed':
-                        message =
-                            "Bạn đã từ chối quyền truy cập microphone hoặc trình duyệt đã chặn.\nHãy cấp lại quyền và thử lại.";
+                        message = "Bạn đã từ chối quyền truy cập microphone hoặc trình duyệt đã chặn.";
                         break;
                     case 'aborted':
-                        message = "Ghi âm đã bị hủy trước khi hoàn tất.";
+                        message = "Ghi âm đã bị hủy.";
                         break;
                     case 'network':
-                        message = "Có sự cố mạng. Vui lòng kiểm tra kết nối Internet.";
+                        message = "Lỗi kết nối mạng.";
                         break;
                     case 'service-not-allowed':
-                        message = "Thiết bị hoặc trình duyệt của bạn không cho phép sử dụng microphone.";
-                        break;
-                    case 'language-not-supported':
-                        message = "Ngôn ngữ không được hỗ trợ.";
+                        message = "Trình duyệt hoặc thiết bị không cho phép sử dụng microphone.";
                         break;
                     default:
                         message = "Lỗi không xác định: " + event.error;
@@ -132,10 +125,12 @@
 
                 alert(message);
                 isListening = false;
+                onError();
             };
 
             recognition.onend = () => {
                 isListening = false;
+                onDone();
                 console.log("Voice recognition ended.");
             };
 
