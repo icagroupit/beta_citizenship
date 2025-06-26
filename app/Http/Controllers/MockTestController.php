@@ -126,19 +126,20 @@ class MockTestController extends Controller
             ]);
         }
 
-        // Nếu là writing và sai thì xử lý retry
+        // Nếu là reading và sai thì xử lý retry
         if ($slug === 'reading') {
             if ($redirect = $this->handleRetry('reading', $questionId, $currentPage, $maxAttempts, $isCorrect, 'writing')) {
                 return $redirect;
             }
         }
 
-        // Nếu là reading và sai thì xử lý retry
+        // Nếu là writing và sai thì xử lý retry
         if ($slug === 'writing') {
             if ($redirect = $this->handleRetry('writing', $questionId, $currentPage, $maxAttempts, $isCorrect, 'n400')) {
                 return $redirect;
             }
         }
+
         // Chuyển trang tiếp theo nếu không phải writing hoặc đúng
         if ($currentPage >= $total) {
             $nextTest = TestType::where('id', '>', $testType->id)->orderBy('id')->first();
@@ -151,35 +152,64 @@ class MockTestController extends Controller
         return redirect()->route('start.mock-test', [$slug, 'page' => $currentPage + 1]);
     }
 
-    private function handleRetry(string $slug, int $questionId, int $currentPage, int $maxAttempts, bool $isCorrect, string $nextSlug)
+    // private function handleRetry($slug, $questionId, $currentPage, $maxAttempts, $isCorrect, $nextSlug)
+    // {
+    //     if ($isCorrect) {
+    //         // Nếu đúng thì không cần retry
+    //         session()->forget("{$slug}_retry_{$questionId}");
+    //         return null;
+    //     }
+
+    //     $retryKey = "{$slug}_retry_{$questionId}";
+    //     $attemptCount = session()->get($retryKey, 1);
+
+    //     if ($attemptCount >= $maxAttempts) {
+    //         session()->forget($retryKey);
+    //         return redirect()->route('mock-test.prepare', [$nextSlug]);
+    //     }
+
+    //     session()->put($retryKey, $attemptCount + 1);
+    //     $remaining = $maxAttempts - $attemptCount;
+
+    //     return redirect()
+    //         ->route('start.mock-test', [$slug, 'page' => $currentPage])
+    //         ->with('error', "Câu trả lời chưa đúng. Bạn còn {$remaining} lượt thử lại.");
+    // }
+
+    private function handleRetry($slug, $questionId, $currentPage, $maxAttempts, $isCorrect, $nextSlug)
     {
-        if ($slug === 'reading' || $slug === 'writing') {
-            if (!$isCorrect) {
-                $key = "{$slug}_retry_{$questionId}";
-                $attemptCount = session()->get($key, 1);
+        $retryKey = "{$slug}_retry_{$questionId}";
+        $resultKey = "{$slug}_retry_result_{$questionId}";
 
-                if ($attemptCount >= $maxAttempts) {
-                    // Xoá hết session key liên quan
-                    foreach (session()->all() as $sessionKey => $value) {
-                        if (str_starts_with($sessionKey, "{$slug}_retry_")) {
-                            session()->forget($sessionKey);
-                        }
-                    }
+        if ($isCorrect) {
+            $attemptCount = session()->get($retryKey, 1);
 
-                    return redirect()->route('mock-test.prepare', [$nextSlug]);
-                }
+            // Ghi lại kết quả retry để showResult dùng
+            session()->put($resultKey, $attemptCount);
 
-                session()->put($key, $attemptCount + 1);
-                $remaining = $maxAttempts - $attemptCount;
-
-                return redirect()->route('start.mock-test', [$slug, 'page' => $currentPage])
-                    ->with('error', "Câu trả lời chưa đúng. Bạn còn {$remaining} lượt thử lại.");
-            }
+            // Xóa retry để không ảnh hưởng đến logic chuyển tiếp
+            session()->forget($retryKey);
+            return null;
         }
 
-        return null;
-    }
+        $attemptCount = session()->get($retryKey, 1);
 
+        if ($attemptCount >= $maxAttempts) {
+            // Ghi lại kết quả là maxAttempts vì đã sai hết
+            session()->put($resultKey, $maxAttempts);
+
+            // Clear retry chính
+            session()->forget($retryKey);
+            return redirect()->route('mock-test.prepare', [$nextSlug]);
+        }
+
+        session()->put($retryKey, $attemptCount + 1);
+        $remaining = $maxAttempts - $attemptCount;
+
+        return redirect()
+            ->route('start.mock-test', [$slug, 'page' => $currentPage])
+            ->with('error', "Câu trả lời chưa đúng. Bạn còn {$remaining} lượt thử lại.");
+    }
 
     public function prepare($slug)
     {
@@ -217,7 +247,7 @@ class MockTestController extends Controller
                 ->get()
                 ->keyBy('question_id');
 
-            $totalQuestions = $questions->count();
+
             $correctAnswers = $userAnswers->where('is_correct', true)->count();
 
             $isPassed = match ($testType->slug) {
@@ -250,6 +280,33 @@ class MockTestController extends Controller
                 ];
             }
 
+            if ($testType->slug === 'civics') {
+                $totalQuestions = UserAnswerQuestion::where('attempt_id', $attemptId)
+                    ->whereIn('question_id', $questionIds)
+                    ->where(function ($query) {
+                        $query->whereNotNull('answer_text')
+                            ->orWhereNotNull('answer_id');
+                    })
+                    ->count();
+            } elseif (in_array($testType->slug, ['reading', 'writing'])) {
+                $totalQuestions = 3;
+
+                foreach ($questions as $question) {
+                    $userAnswer = $userAnswers->get($question->id);
+
+                    if ($userAnswer && $userAnswer->is_correct) {
+                        $resultKey = "{$testType->slug}_retry_result_{$question->id}";
+                        $retryCount = session()->get($resultKey);
+
+                        $totalQuestions = $retryCount ?? 1;
+                        break;
+                    }
+                }
+            } else {
+                $totalQuestions = $questions->count();
+            }
+            // $totalQuestions = $questions->count();
+
             $results[] = [
                 'title' => $testType->title,
                 'vietnamese_title' => $testType->vietnamese_title,
@@ -265,6 +322,7 @@ class MockTestController extends Controller
 
 
         $request->session()->forget('mock_test_attempt_id');
+
         return view('mockTests.result', compact('results'));
     }
 }
