@@ -226,9 +226,12 @@ class MockTestController extends Controller
 
                 $details[] = [
                     'question' => $question->question_text,
+                    'vietnamese_question' => $question->vietnamese_question_text,
                     'type' => $question->type,
                     'user_answer' => $userAnswer?->answer_text ?? $userAnswer?->answer?->answer_text,
                     'correct_answer' => $correctAnswer?->answer_text,
+                    'vietnamese_correct_answer' => $correctAnswer?->vietnamese_answer_text,
+                    'pronunciation_suggest_answer' => $correctAnswer?->pronunciation_suggest,
                     'is_correct' => $userAnswer?->is_correct,
                 ];
             }

@@ -28,13 +28,14 @@ class FullMockTestSeeder extends Seeder
             $q = Question::create([
                 'test_type_id' => $civics->id,
                 'question_text' => "Civics question $i?",
+                'vietnamese_question_text' => "Câu hỏi Civics số $i?",
                 'type' => 'multiple_choice',
             ]);
             Answer::insert([
-                ['question_id' => $q->id, 'answer_text' => "Correct answer $i", 'is_correct' => true],
-                ['question_id' => $q->id, 'answer_text' => "Wrong answer $i", 'is_correct' => false],
-                ['question_id' => $q->id, 'answer_text' => "Wrong answer $i", 'is_correct' => false],
-                ['question_id' => $q->id, 'answer_text' => "Wrong answer $i", 'is_correct' => false],
+                ['question_id' => $q->id, 'answer_text' => "Correct answer $i", 'vietnamese_answer_text' => "Câu trả lời đúng $i", 'is_correct' => true],
+                ['question_id' => $q->id, 'answer_text' => "Wrong answer $i", 'vietnamese_answer_text' => "Câu trả lời sai $i", 'is_correct' => false],
+                ['question_id' => $q->id, 'answer_text' => "Wrong answer $i", 'vietnamese_answer_text' => "Câu trả lời sai $i", 'is_correct' => false],
+                ['question_id' => $q->id, 'answer_text' => "Wrong answer $i", 'vietnamese_answer_text' => "Câu trả lời sai $i", 'is_correct' => false],
             ]);
         }
 
@@ -49,12 +50,14 @@ class FullMockTestSeeder extends Seeder
 
         $q3 = Question::create([
             'test_type_id' => $reading->id,
-            'question_text' => 'Read this sentence: "Citizens can vote."',
+            'question_text' => 'Read this sentence: "Citizens can vote"',
+            'vietnamese_question_text' => 'Đọc câu sau: "Citizens can vote"',
             'type' => 'text',
         ]);
         Answer::create([
             'question_id' => $q3->id,
-            'answer_text' => 'Citizens can vote.',
+            'answer_text' => 'Citizens can vote',
+            'pronunciation_suggest' => 'Ci-ti-gien can vốt',
             'is_correct' => true,
         ]);
 
@@ -69,12 +72,14 @@ class FullMockTestSeeder extends Seeder
 
         $q4 = Question::create([
             'test_type_id' => $writing->id,
-            'question_text' => 'Write this sentence: "We pay taxes."',
+            'question_text' => 'Write this sentence: "We pay taxes"',
+            'vietnamese_question_text' => 'Viết câu sau: "We pay taxes"',
             'type' => 'text',
         ]);
         Answer::create([
             'question_id' => $q4->id,
-            'answer_text' => 'We pay taxes.',
+            'answer_text' => 'We pay taxes',
+            'pronunciation_suggest' => 'Quy bay tát(s)',
             'is_correct' => true,
         ]);
 
@@ -104,8 +109,8 @@ class FullMockTestSeeder extends Seeder
             'type' => 'multiple_choice',
         ]);
         Answer::insert([
-            ['question_id' => $q6->id, 'answer_text' => "No", 'is_correct' => true],
-            ['question_id' => $q6->id, 'answer_text' => "Yes", 'is_correct' => false],
+            ['question_id' => $q6->id, 'answer_text' => "No", 'is_correct' => true, 'has_additional_answer' => false],
+            ['question_id' => $q6->id, 'answer_text' => "Yes", 'is_correct' => false, 'has_additional_answer' => true],
         ]);
     }
 }

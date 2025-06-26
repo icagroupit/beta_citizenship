@@ -50,16 +50,30 @@
                                 @foreach ($result['details'] as $i => $detail)
                                     <div class="p-3 border rounded mb-3 bg-light">
                                         <div class="font-sm">{{ $i + 1 }}:
-                                            {{ $detail['question'] }}</div>
+                                            {{ $detail['question'] }}
+                                            @if ($detail['vietnamese_question'])
+                                                <p class="font-sm-italic">Dịch: {{ $detail['vietnamese_question'] }}</p>
+                                            @endif
+                                        </div>
 
                                         @if ($result['slug'] == 'n400')
                                             <p class="font-sm">Câu trả lời của bạn:
-                                                <strong>{{ $detail['user_answer'] }}</strong></p>
+                                                <strong>{{ $detail['user_answer'] }}</strong>
+                                            </p>
                                         @elseif ($detail['is_correct'])
                                             <div class="d-flex align-items-center gap-2 font-sm">
                                                 <img src="{{ asset('icons/mockTests/success.svg') }}" alt="Success">
                                                 <p class="text-success m-0">{{ $detail['user_answer'] }}</p>
                                             </div>
+                                            @if ($detail['vietnamese_correct_answer'])
+                                                <p class="font-sm-italic">Dịch: {{ $detail['vietnamese_correct_answer'] }}
+                                                </p>
+                                            @endif
+                                            @if ($detail['pronunciation_suggest_answer'])
+                                                <p class="font-sm-italic"><strong>Phát âm dễ nhớ: </strong>
+                                                    {{ $detail['pronunciation_suggest_answer'] }}
+                                                </p>
+                                            @endif
                                         @else
                                             <div class="d-flex align-items-center gap-2 mb-2 font-sm">
                                                 <img src="{{ asset('icons/mockTests/error.svg') }}" alt="Error">
@@ -70,6 +84,15 @@
                                                 <img src="{{ asset('icons/mockTests/success.svg') }}" alt="Success">
                                                 <p class="text-success m-0">{{ $detail['correct_answer'] }}</p>
                                             </div>
+                                            @if ($detail['vietnamese_correct_answer'])
+                                                <p class="font-sm-italic">Dịch: {{ $detail['vietnamese_correct_answer'] }}
+                                                </p>
+                                            @endif
+                                            @if ($detail['pronunciation_suggest_answer'])
+                                                <p class="font-sm-italic"><strong>Phát âm dễ nhớ: </strong>
+                                                    {{ $detail['pronunciation_suggest_answer'] }}
+                                                </p>
+                                            @endif
                                         @endif
                                     </div>
                                 @endforeach
