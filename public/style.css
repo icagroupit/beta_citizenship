@@ -290,6 +290,7 @@ body {
 
 /* Audio */
 .audio {
+    font-family: "Inter", serif;
     width: 90px;
     background: #fff;
     padding: 10px 20px;
@@ -472,15 +473,16 @@ input::placeholder {
 /* Responsive design */
 @media (max-width: 600px) {
     .option {
+        width: 100%;
+        max-width: 440px;
         font-size: 15px;
         padding: 14px 16px;
     }
 }
 
-/* Responsive Design */
 @media (min-width: 768px) {
     .container {
-        max-width: 480px;
+        max-width: 980px;
         margin: 0 auto;
         box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
     }
@@ -507,6 +509,6 @@ input::placeholder {
 
 @media (min-width: 1024px) {
     .container {
-        max-width: 600px;
+        max-width: 980px; /* giữ nguyên không thu nhỏ lại */
     }
 }
